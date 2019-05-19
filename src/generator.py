@@ -1,4 +1,5 @@
-import embedding as embedding_loader
+import src.embedding as embedding_loader
+from src.global_constants import START_OF_SEQUENCE_TOKEN, END_OF_LINE_TOKEN, END_OF_SEQUENCE_TOKEN, OUT_OF_VOCAB_TOKEN, MODELS_DICT
 import numpy as np
 from keras.models import load_model
 from keras.backend import set_epsilon, set_floatx
@@ -7,9 +8,9 @@ def generate_poem(model, reverse_dictionary, dictionary, seed_length):
     poem = ""
     last_output = ""
     iterations = 0
-    seed = np.array([dictionary["<sos/>"]]*seed_length)
+    seed = np.array([dictionary[START_OF_SEQUENCE_TOKEN]]*seed_length)
     already_eol = False  # Sometimes too many eols are generated, this breaks the format
-    while iterations < 60 and last_output != "<eos/>":
+    while iterations < 60 and last_output != END_OF_SEQUENCE_TOKEN:
         last_output_dist = model.predict(np.array([seed])).squeeze()
         last_output_idx = np.random.choice(len(dictionary), 1, p=last_output_dist).item()
         last_output = reverse_dictionary[last_output_idx]
@@ -17,14 +18,14 @@ def generate_poem(model, reverse_dictionary, dictionary, seed_length):
         seed = np.append(seed[1:], last_output_idx)
         iterations += 1
 
-        if last_output == "<eos/>" or iterations == 60:
+        if last_output == END_OF_SEQUENCE_TOKEN or iterations == 60:
             if already_eol:
                 poem += "\n"
             else:
                 poem += "\n\n"
-        elif last_output == "<oov/>" or last_output == "<sos/>":
+        elif last_output == OUT_OF_VOCAB_TOKEN or last_output == START_OF_SEQUENCE_TOKEN:
             pass
-        elif last_output == "<eol/>":
+        elif last_output == END_OF_LINE_TOKEN:
             if  iterations>1 and not already_eol:
                 already_eol = True
                 poem += "\n"
@@ -50,4 +51,4 @@ def generate_poems(num_of_poems, seed_length, output_filename, model_file):
 if __name__ == "__main__":
     set_floatx("float16")
     set_epsilon(1e-04)
-    generate_poems(1000, 7, "generated/poems.txt", "models/model.hdf5")
+    generate_poems(1000, 7, "../generated/poems.txt", MODELS_DICT+"/model.hdf5")

@@ -1,5 +1,7 @@
 *.iml
 .idea/
+generated/
+models/
 
 # Latex
 *.pdf

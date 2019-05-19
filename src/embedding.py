@@ -1,26 +1,24 @@
 from gensim.models.keyedvectors import KeyedVectors
 import numpy as np
 import pickle
+import src.data_prepocessing as dp
+from src.global_constants import START_OF_SEQUENCE_TOKEN, END_OF_LINE_TOKEN, END_OF_SEQUENCE_TOKEN, \
+    OUT_OF_VOCAB_TOKEN, EMBEDDING_PATH, EMBEDDING_DIMENSION, MODELS_DICT
 
-import data_prepocessing as dp
+EMBEDDING_FILE = MODELS_DICT+"/embedding.pkl"
+DICTIONARY_FILE = MODELS_DICT+"/dict.pkl"
 
-EMBEDDING_PATH = r"C:\Users\Gregor\Documents\Programming\embedding\glove.6B.50d.txt" #"DATA/glove.6B.50d.txt""
 
-EMBEDDING_FILE = r"DATA/embedding.pkl"
-DICTIONARY_FILE = r"DATA/dict.pkl"
-
-EMBEDDING_DIM = 50
-
-def get_embedding(words, save=False, load=False, limit=400000):
+def get_embedding(words, binary=False, save=False, load=False, limit=40000):
     if load:
         embedding = pickle.load(open(EMBEDDING_FILE, "rb"))
         dictionary = pickle.load(open(DICTIONARY_FILE, "rb"))
         return embedding, dictionary
-    entire_embedding = KeyedVectors.load_word2vec_format(EMBEDDING_PATH, limit=limit)
+    entire_embedding = KeyedVectors.load_word2vec_format(EMBEDDING_PATH, limit=limit, binary=binary)
     # init with special tokens
-    embedding = [np.random.normal(size=EMBEDDING_DIM), np.random.normal(size=EMBEDDING_DIM),
-                 np.random.normal(size=EMBEDDING_DIM), np.random.normal(size=EMBEDDING_DIM)]
-    dictionary = {"<oov/>": 0, "<eos/>": 1, "<eol/>": 2, "<sos/>": 3}
+    embedding = [np.random.normal(size=EMBEDDING_DIMENSION), np.random.normal(size=EMBEDDING_DIMENSION),
+                 np.random.normal(size=EMBEDDING_DIMENSION), np.random.normal(size=EMBEDDING_DIMENSION)]
+    dictionary = {OUT_OF_VOCAB_TOKEN: 0, END_OF_SEQUENCE_TOKEN: 1, END_OF_LINE_TOKEN: 2, START_OF_SEQUENCE_TOKEN: 3}
     for word in words:
         if word in dictionary:
             continue
@@ -44,19 +42,19 @@ def tuple_to_indices(ngram_tuples, dictionary, remove_oov_labels=False):
             try:
                 index_ngram.append(dictionary[word])
             except KeyError:
-                index_ngram.append(dictionary["<oov/>"])
+                index_ngram.append(dictionary[OUT_OF_VOCAB_TOKEN])
         try:
             index_label = dictionary[label]
         except KeyError:
             if remove_oov_labels:
                 continue
             else:
-                index_label = dictionary["<oov/>"]
+                index_label = dictionary[OUT_OF_VOCAB_TOKEN]
         index_ngram_tuples.append((index_ngram, index_label))
     return index_ngram_tuples
 
 if __name__ == "__main__":
-    poems = dp.tokenize_poems("DATA/train_poems.txt")
+    poems = dp.tokenize_poems("../data/train_poems.txt")
     words = set([token for poem in poems for token in poem])
     embedding, dictionary = get_embedding(words)
 
