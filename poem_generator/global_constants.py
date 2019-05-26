@@ -2,6 +2,7 @@ END_OF_LINE_TOKEN = "<eol/>"
 END_OF_SEQUENCE_TOKEN = "<eos/>"
 OUT_OF_VOCAB_TOKEN = "<oov/>"
 START_OF_SEQUENCE_TOKEN = "<sos/>"
+PADDING_TOKEN = "<padding/>"
 
 TRAINING_DATA = r"C:\Users\Gregor\Documents\Programming\poem-generation\data\train_poems.txt"
 

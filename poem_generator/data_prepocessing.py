@@ -1,4 +1,4 @@
-from src.global_constants import END_OF_LINE_TOKEN, END_OF_SEQUENCE_TOKEN, START_OF_SEQUENCE_TOKEN
+from poem_generator.global_constants import END_OF_LINE_TOKEN, END_OF_SEQUENCE_TOKEN, START_OF_SEQUENCE_TOKEN
 
 def tokenize_poems(file):
     poems = []
@@ -14,13 +14,19 @@ def tokenize_poems(file):
                 poem.extend(tokens)
     return poems
 
+def multi_ngram_tupelizer(poems, ns):
+    tuples = []
+    for n in ns:
+        tuples.append(ngram_tuplelizer(poems, n))
+    return tuples
+
 def ngram_tuplelizer(poems, n):
     tuples = []
     poems = [[START_OF_SEQUENCE_TOKEN]*n + poem for poem in poems]
     for poem in poems:
         i = 0
         while i+n < len(poem):
-            tuples.append((poem[i:i+n], poem[i+n]))
+            tuples.append((poem[i:i+n], poem[i+1:i+n+1]))
             i += 1
     return tuples
 
