@@ -73,26 +73,27 @@ def bidirectional_lstm(n, embedding, vocab_len):
 if __name__ == "__main__":
     set_floatx("float16")
     set_epsilon(1e-04)
-    ns = [20]
+    ns = [5]
     epochs = 20
     batch_size = 512
     max_limit = 25000
     validation_split = 0.9
 
     poems = dp.tokenize_poems(TRAINING_DATA)
-    words = set([token for poem in poems for token in poem])
+    words = sorted(list(set([token for poem in poems for token in poem])))
 
     #Save embedding for generator
     embedding, dictionary = embedding_loader.get_embedding(words, binary=EMBEDDING_BINARY, limit=max_limit, save=True)
 
-    model = transformer(100, embedding, len(dictionary))
+    #model = load_model(MODELS_DICT+"/5model.hdf5", custom_objects={"PositionalEncoding": PositionalEncoding, "Attention": Attention})
+    model = transformer(100, embedding, len(dictionary), True)
 
-    model.compile(optimizer=optimizer.Adam(),
+    model.compile(optimizer=optimizer.Adam(decay=1e-5),
                   loss="categorical_crossentropy", metrics=["accuracy"])
 
-    generator = TupleDataGenerator(poems[:int(validation_split*len(poems))], ns, dictionary, 0, batch_size)
-    validation_generator = TupleDataGenerator(poems[int(validation_split*len(poems)):], ns, dictionary, 0, batch_size)
-    callbacks = [ModelCheckpoint(MODELS_DICT+"/4-model.hdf5", save_best_only=True),
+    generator = TupleDataGenerator(poems[:int(validation_split*len(poems))], ns, dictionary, 0.1, batch_size, single=True)
+    validation_generator = TupleDataGenerator(poems[int(validation_split*len(poems)):], ns, dictionary, 0, batch_size, single=True)
+    callbacks = [ModelCheckpoint(MODELS_DICT+"/model.hdf5", save_best_only=True),
                  CSVLogger(MODELS_DICT+"/log.csv", append=True, separator=';')]
     model.fit_generator(
         generator, epochs=epochs, callbacks=callbacks, validation_data=validation_generator, workers=4)

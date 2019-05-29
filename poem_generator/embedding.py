@@ -7,7 +7,8 @@ from poem_generator.global_constants import START_OF_SEQUENCE_TOKEN, END_OF_LINE
 
 EMBEDDING_FILE = MODELS_DICT+"/embedding.pkl"
 DICTIONARY_FILE = MODELS_DICT+"/dict.pkl"
-
+CHAR_EMBEDDING_FILE = MODELS_DICT+"/char-embedding.pkl"
+CHAR_DICTIONARY_FILE = MODELS_DICT+"/char-dict.pkl"
 
 def get_embedding(words, binary=False, save=False, load=False, limit=40000):
     if load:
@@ -33,6 +34,27 @@ def get_embedding(words, binary=False, save=False, load=False, limit=40000):
     if save:
         pickle.dump(embedding, open(EMBEDDING_FILE, "wb"))
         pickle.dump(dictionary, open(DICTIONARY_FILE, "wb"))
+    return embedding, dictionary
+
+def get_char_embedding(characters, save=False, load=False):
+    if load:
+        embedding = pickle.load(open(CHAR_EMBEDDING_FILE, "rb"))
+        dictionary = pickle.load(open(CHAR_DICTIONARY_FILE, "rb"))
+        return embedding, dictionary
+    # init with special tokens
+    embedding = [np.zeros(shape=EMBEDDING_DIMENSION), np.random.normal(size=EMBEDDING_DIMENSION),
+                 np.random.normal(size=EMBEDDING_DIMENSION),
+                 np.random.normal(size=EMBEDDING_DIMENSION), np.random.normal(size=EMBEDDING_DIMENSION)]
+    dictionary = {PADDING_TOKEN: 0, OUT_OF_VOCAB_TOKEN: 1, END_OF_SEQUENCE_TOKEN: 2, END_OF_LINE_TOKEN: 3, START_OF_SEQUENCE_TOKEN: 4}
+    for char in characters:
+        if char not in dictionary:
+            char_embedding = np.random.normal(size=EMBEDDING_DIMENSION)
+            dictionary[char] = len(dictionary)
+            embedding.append(char_embedding)
+    embedding = np.array(embedding)
+    if save:
+        pickle.dump(embedding, open(CHAR_EMBEDDING_FILE, "wb"))
+        pickle.dump(dictionary, open(CHAR_DICTIONARY_FILE, "wb"))
     return embedding, dictionary
 
 def tuple_to_indices(ngram_tuples, dictionary, remove_oov_labels=False):

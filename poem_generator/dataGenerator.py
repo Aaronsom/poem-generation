@@ -5,21 +5,28 @@ from keras.utils import Sequence
 
 def label_smoothing(labels, vocab_len, smoothing):
     array_labels = np.zeros(shape=(len(labels), len(labels[0]), vocab_len), dtype="float16")
-    array_labels = array_labels + smoothing/(vocab_len-1)
+    #array_labels = array_labels + smoothing/(vocab_len-1)
     for i, label in enumerate(labels):
         for j, val in enumerate(label):
             array_labels[i, j, val] = 1-smoothing
     return array_labels
 
+def single_label_smoothing(labels, vocab_len, smoothing):
+    array_labels = np.zeros(shape=(len(labels), vocab_len), dtype="float16")
+    array_labels = array_labels + smoothing/(vocab_len-1)
+    for i, val in enumerate(labels):
+        array_labels[i, val] = 1-smoothing
+    return array_labels
 
 class TupleDataGenerator(Sequence):
 
-    def __init__(self, poems, ns, dictionary, smoothing, batch_size, shuffle=True):
+    def __init__(self, poems, ns, dictionary, smoothing, batch_size, sos_pad=True, single=False, first_tuple_only=False, shuffle=True):
         self.vocab_len = len(dictionary)
         self.smoothing = smoothing
         self.batch_size = batch_size
         self.shuffle = shuffle
-        tuples = multi_ngram_tupelizer(poems, ns)
+        self.single = single
+        tuples = multi_ngram_tupelizer(poems, ns, sos_pad, first_tuple_only, single)
         self.data = [[np.array(item) for item in zip(*tuple_to_indices(tuple, dictionary, True))] for tuple in tuples]
         length = sum([len(tuple) for tuple in tuples])
         print(f"Training on {self.vocab_len} words with {length} {ns}-tuples")
@@ -36,7 +43,7 @@ class TupleDataGenerator(Sequence):
         idx, batch_idx = self.indexes[item]
         data = self.data[idx][0][batch_idx]
         labels = self.data[idx][1][batch_idx]
-        labels = label_smoothing(labels, self.vocab_len, self.smoothing)
+        labels = single_label_smoothing(labels, self.vocab_len, self.smoothing)
         return data, labels
 
     def __len__(self):

@@ -141,17 +141,22 @@ def decoder_block(encoder_inputs, inputs):
     out = TimeDistributed(BatchNormalization())(out)
     return out
 
-def transformer(n, embedding, vocab_len):
+def transformer(n, embedding, vocab_len, single_out, blocks=6, train_embedding=False):
     inputs = Input(shape=(None, ))
-    embedding = Embedding(input_dim=vocab_len, output_dim=EMBEDDING_DIMENSION, weights=[embedding], trainable=False)(inputs)
+    embedding = Embedding(input_dim=vocab_len, output_dim=EMBEDDING_DIMENSION, weights=[embedding], trainable=train_embedding)(inputs)
     embedding = PositionalEncoding(n)(embedding)
     encoder = Dropout(0.1)(embedding)
-    for i in range(4):
+    for i in range(blocks):
         encoder = encoder_block(encoder)
     decoder = Dropout(0.1)(embedding)
-    for i in range(4):
+    for i in range(blocks):
         decoder = decoder_block(encoder, decoder)
     out = Dropout(0.1)(encoder)
-    out = TimeDistributed(Dense(vocab_len, activation="softmax"))(out)
+    if single_out:
+        out = Lambda(lambda x: x[:, -1])(out)
+        out = Dense(vocab_len, activation="softmax")(out)
+    else:
+        out = TimeDistributed(Dense(vocab_len, activation="softmax"))(out)
     model = Model(inputs=inputs, outputs=out)
+    model.summary()
     return model

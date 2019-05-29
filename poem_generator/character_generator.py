@@ -7,32 +7,33 @@ from keras.backend import set_epsilon, set_floatx
 from poem_generator.transformer import Attention, PositionalEncoding
 import zipfile
 
-def generate_poem(model, reverse_dictionary, dictionary, seed_length, dynamic_seed=False):
+def generate_poem(model, reverse_dictionary, dictionary, seed_length, dynamic_seed=True):
     poem = ""
     last_output = ""
     iterations = 0
+    max_len = 333
+    min_len = 66
     seed = np.array([dictionary[START_OF_SEQUENCE_TOKEN]]*seed_length)
     already_eol = False  # Sometimes too many eols are generated, this breaks the format
-    while iterations < 60 and last_output != END_OF_SEQUENCE_TOKEN:
-        last_output_dist = model.predict(np.array([seed]))[:, -1].squeeze()
+    while iterations < max_len and last_output != END_OF_SEQUENCE_TOKEN:
+        #last_output_dist = model.predict(np.array([seed]))[:, -1].squeeze()
+        last_output_dist = model.predict(np.array([seed])).squeeze()
         last_output_idx = np.random.choice(len(dictionary), 1, p=last_output_dist).item()
         last_output = reverse_dictionary[last_output_idx]
 
 
         iterations += 1
 
-        if last_output == END_OF_SEQUENCE_TOKEN or iterations == 60:
-            if iterations < 15:
+        if last_output == END_OF_SEQUENCE_TOKEN or iterations == max_len:
+            if iterations < min_len:
                 print("Too short. Try again\n")
                 return generate_poem(model, reverse_dictionary, dictionary, seed_length, dynamic_seed)
             if already_eol:
                 poem += "\n"
             else:
                 poem += "\n\n"
-        elif last_output == OUT_OF_VOCAB_TOKEN or last_output == PADDING_TOKEN:
+        elif last_output == OUT_OF_VOCAB_TOKEN or last_output == PADDING_TOKEN or last_output == START_OF_SEQUENCE_TOKEN:
             iterations -= 1
-        elif last_output == START_OF_SEQUENCE_TOKEN:
-            pass
         elif last_output == END_OF_LINE_TOKEN:
             if iterations>1 and not already_eol:
                 already_eol = True
@@ -50,7 +51,7 @@ def generate_poem(model, reverse_dictionary, dictionary, seed_length, dynamic_se
     return poem
 
 def generate_poems(num_of_poems, seed_length, output_filename, model_file):
-    _, dictionary = embedding_loader.get_embedding(None, load=True)
+    _, dictionary = embedding_loader.get_char_embedding(None, load=True)
     reverse_dictionary = {dictionary[key]: key for key in dictionary.keys()}
     model = load_model(model_file, custom_objects={"PositionalEncoding": PositionalEncoding, "Attention": Attention})
     generated_poems = ""
@@ -67,6 +68,5 @@ def generate_poems(num_of_poems, seed_length, output_filename, model_file):
 if __name__ == "__main__":
     set_floatx("float16")
     set_epsilon(1e-04)
-    ns = [4]
-    for n in ns:
-        generate_poems(1000, n, "../generated/"+str(n)+"-poems.zip", MODELS_DICT+"/4-model.hdf5")
+    n = 25
+    generate_poems(1000, n, "../generated/"+str(n)+"-char-poems.zip", MODELS_DICT+"/char-model.hdf5")
