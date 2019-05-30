@@ -1,7 +1,8 @@
 import numpy as np
 from poem_generator.embedding import tuple_to_indices
 from poem_generator.data_prepocessing import multi_ngram_tupelizer
-from keras.utils.data_utils import Sequence
+from tensorflow.keras.utils import Sequence
+#from keras.utils import Sequence
 
 def label_smoothing(labels, vocab_len, smoothing):
     array_labels = np.zeros(shape=(len(labels), len(labels[0]), vocab_len), dtype="float16")
