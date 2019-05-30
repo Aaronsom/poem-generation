@@ -17,20 +17,16 @@ class Attention(Layer):
         self.self_attention = self_attention
 
     def build(self, input_shape):
-        if self.self_attention:
-            shape = input_shape[2]
-        else:
-            shape = input_shape[0][2]
         self.query = self.add_weight(name='query',
-                                      shape=(shape, self.dim),
+                                      shape=(EMBEDDING_DIMENSION, self.dim),
                                       initializer='uniform',
                                       trainable=True)
         self.key = self.add_weight(name='key',
-                                      shape=(shape, self.dim),
+                                      shape=(EMBEDDING_DIMENSION, self.dim),
                                       initializer='uniform',
                                       trainable=True)
         self.value = self.add_weight(name='value',
-                                      shape=(shape, self.dim),
+                                      shape=(EMBEDDING_DIMENSION, self.dim),
                                       initializer='uniform',
                                       trainable=True)
         super(Attention, self).build(input_shape)  # Be sure to call this somewhere!
