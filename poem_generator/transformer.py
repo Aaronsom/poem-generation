@@ -1,7 +1,10 @@
 from poem_generator.global_constants import EMBEDDING_DIMENSION
-from keras.models import Model
-import keras.backend as K
-from keras.layers import *
+#from keras.models import Model
+#import keras.backend as K
+import tensorflow.keras.backend as K
+#from keras.layers import *
+from tensorflow.keras.layers import *
+from tensorflow.keras import Model
 import tensorflow as tf
 import numpy as np
 
@@ -158,5 +161,4 @@ def transformer(n, embedding, vocab_len, single_out, blocks=6, train_embedding=F
     else:
         out = TimeDistributed(Dense(vocab_len, activation="softmax"))(out)
     model = Model(inputs=inputs, outputs=out)
-    model.summary()
     return model
