@@ -141,8 +141,8 @@ def decoder_block(encoder_inputs, inputs):
     out = TimeDistributed(BatchNormalization())(out)
     return out
 
-def transformer(n, embedding, vocab_len, single_out, blocks=6, train_embedding=False):
-    inputs = Input(shape=(None, ))
+def transformer(n, embedding, vocab_len, single_out, blocks=6, train_embedding=False, input_sequence_length=None):
+    inputs = Input(shape=(input_sequence_length, ))
     embedding = Embedding(input_dim=vocab_len, output_dim=EMBEDDING_DIMENSION, weights=[embedding], trainable=train_embedding)(inputs)
     embedding = PositionalEncoding(n)(embedding)
     encoder = Dropout(0.1)(embedding)
