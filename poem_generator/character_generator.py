@@ -7,7 +7,7 @@ from keras.backend import set_epsilon, set_floatx
 from poem_generator.transformer import Attention, PositionalEncoding
 import zipfile
 
-def generate_poem(model, reverse_dictionary, dictionary, seed_length, dynamic_seed=True):
+def generate_poem(model, reverse_dictionary, dictionary, seed_length, dynamic_seed=False):
     poem = ""
     last_output = ""
     iterations = 0
@@ -50,14 +50,14 @@ def generate_poem(model, reverse_dictionary, dictionary, seed_length, dynamic_se
     print(poem)
     return poem
 
-def generate_poems(num_of_poems, seed_length, output_filename, model_file):
+def generate_poems(num_of_poems, seed_length, output_filename, model_file, dynamic_seed=False):
     _, dictionary = embedding_loader.get_char_embedding(None, load=True)
     reverse_dictionary = {dictionary[key]: key for key in dictionary.keys()}
     model = load_model(model_file, custom_objects={"PositionalEncoding": PositionalEncoding, "Attention": Attention})
     generated_poems = ""
     for i in range(num_of_poems):
         print(f"{i+1}/{num_of_poems}")
-        poem = generate_poem(model, reverse_dictionary, dictionary, seed_length)
+        poem = generate_poem(model, reverse_dictionary, dictionary, seed_length, dynamic_seed)
         generated_poems += poem
     #with open(output_filename, "w", encoding="utf-8") as file:
     #    file.write(generated_poems)
