@@ -43,7 +43,7 @@ class Attention(Layer):
             value = tf.tensordot(x[1], self.value, axes=[[2], [0]])
         relevancy = 1/8 * K.batch_dot(query, K.permute_dimensions(key, [0, 2, 1]))
         if self.mask:
-            masking = tf.cast((1 - tf.matrix_band_part(tf.ones_like(relevancy, dtype="float32"), -1, 0)), "float16")# not working with float16? Upper triangle is != 0
+            masking = tf.cast((1 - tf.matrix_band_part(tf.ones_like(relevancy, dtype="float32"), -1, 0)), K.floatx())# not working with float16? Upper triangle is != 0
             masked = tf.math.add(relevancy, -20*masking)
         else:
             masked = relevancy
@@ -92,7 +92,7 @@ class PositionalEncoding(Layer):
 def positional_encoding(n):
     position_enc = np.array([[
         [pos / np.power(10000, 2 * (j // 2) / EMBEDDING_DIMENSION) for j in range(EMBEDDING_DIMENSION)]
-        for pos in range(n)]], dtype="float16")
+        for pos in range(n)]], dtype=K.floatx())
     position_enc[1:, 0::2] = np.sin(position_enc[1:, 0::2])  # dim 2i
     position_enc[1:, 1::2] = np.cos(position_enc[1:, 1::2])  # dim 2i+1
     return position_enc
