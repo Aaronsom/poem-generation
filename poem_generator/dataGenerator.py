@@ -6,7 +6,7 @@ from tensorflow.keras.utils import Sequence
 
 def label_smoothing(labels, vocab_len, smoothing):
     array_labels = np.zeros(shape=(len(labels), len(labels[0]), vocab_len), dtype="float16")
-    #array_labels = array_labels + smoothing/(vocab_len-1)
+    array_labels = array_labels + smoothing/(vocab_len-1)
     for i, label in enumerate(labels):
         for j, val in enumerate(label):
             array_labels[i, j, val] = 1-smoothing

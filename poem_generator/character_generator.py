@@ -2,7 +2,7 @@ import poem_generator.embedding as embedding_loader
 from poem_generator.global_constants import START_OF_SEQUENCE_TOKEN, END_OF_LINE_TOKEN, END_OF_SEQUENCE_TOKEN, \
     PADDING_TOKEN, OUT_OF_VOCAB_TOKEN, MODELS_DICT
 import numpy as np
-from keras.models import load_model
+from tensorflow.keras.models import load_model
 from keras.backend import set_epsilon, set_floatx
 from poem_generator.transformer import Attention, PositionalEncoding
 import zipfile

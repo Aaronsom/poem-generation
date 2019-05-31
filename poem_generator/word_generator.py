@@ -2,7 +2,7 @@ import poem_generator.embedding as embedding_loader
 from poem_generator.global_constants import START_OF_SEQUENCE_TOKEN, END_OF_LINE_TOKEN, END_OF_SEQUENCE_TOKEN, \
     PADDING_TOKEN, OUT_OF_VOCAB_TOKEN, MODELS_DICT
 import numpy as np
-from keras.models import load_model
+from tensorflow.keras.models import load_model
 from keras.backend import set_epsilon, set_floatx
 from poem_generator.transformer import Attention, PositionalEncoding
 import zipfile
@@ -66,6 +66,5 @@ def generate_poems(num_of_poems, seed_length, output_filename, model_file, dyani
 if __name__ == "__main__":
     set_floatx("float16")
     set_epsilon(1e-04)
-    ns = [1]
-    for n in ns:
-        generate_poems(1000, n, "../generated/"+str(n)+"-poems.zip", MODELS_DICT+"/model.hdf5")
+    n = 5
+    generate_poems(1000, n, "../generated/"+str(n)+"-poems.zip", MODELS_DICT+"/model.hdf5")
