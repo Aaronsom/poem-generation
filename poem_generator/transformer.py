@@ -125,7 +125,7 @@ def encoder_block(inputs, heads):
     return out
 
 def decoder_block(encoder_inputs, inputs, heads):
-    Attention(64, heads=heads, mask=True, self_attention=True)(inputs)
+    attention = Attention(64, heads=heads, mask=True, self_attention=True)(inputs)
     attention = Dropout(0.1)(attention)
     attention = Add()([attention, inputs])
     out = TimeDistributed(BatchNormalization())(attention)
