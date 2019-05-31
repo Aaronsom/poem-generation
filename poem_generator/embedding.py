@@ -10,12 +10,14 @@ DICTIONARY_FILE = MODELS_DICT+"/dict.pkl"
 CHAR_EMBEDDING_FILE = MODELS_DICT+"/char-embedding.pkl"
 CHAR_DICTIONARY_FILE = MODELS_DICT+"/char-dict.pkl"
 
-def get_embedding(words, binary=False, save=False, load=False, limit=40000):
+def get_embedding(words, binary=False, save=False, load=False, limit=40000, file=None):
     if load:
         embedding = pickle.load(open(EMBEDDING_FILE, "rb"))
         dictionary = pickle.load(open(DICTIONARY_FILE, "rb"))
         return embedding, dictionary
-    entire_embedding = KeyedVectors.load_word2vec_format(EMBEDDING_PATH, limit=limit, binary=binary)
+    if file is None:
+        file=EMBEDDING_PATH
+    entire_embedding = KeyedVectors.load_word2vec_format(file, limit=limit, binary=binary)
     # init with special tokens
     embedding = [np.zeros(shape=EMBEDDING_DIMENSION), np.random.normal(size=EMBEDDING_DIMENSION),
                  np.random.normal(size=EMBEDDING_DIMENSION),
