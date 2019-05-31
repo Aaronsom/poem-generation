@@ -7,15 +7,17 @@ from keras.backend import set_epsilon, set_floatx
 from poem_generator.transformer import Attention, PositionalEncoding
 import zipfile
 
-def generate_poem(model, reverse_dictionary, dictionary, seed_length, dynamic_seed=False):
+def generate_poem(model, reverse_dictionary, dictionary, seed_length, dynamic_seed=False, single=False):
     poem = ""
     last_output = ""
     iterations = 0
     seed = np.array([dictionary[START_OF_SEQUENCE_TOKEN]]*seed_length)
     already_eol = False  # Sometimes too many eols are generated, this breaks the format
     while iterations < 60 and last_output != END_OF_SEQUENCE_TOKEN:
-        #last_output_dist = model.predict(np.array([seed]))[:, -1].squeeze()
-        last_output_dist = model.predict(np.array([seed])).squeeze()
+        if single:
+            last_output_dist = model.predict(np.array([seed])).squeeze()
+        else:
+            last_output_dist = model.predict(np.array([seed]))[:, -1].squeeze()
         last_output_idx = np.random.choice(len(dictionary), 1, p=last_output_dist).item()
         last_output = reverse_dictionary[last_output_idx]
 
@@ -48,14 +50,14 @@ def generate_poem(model, reverse_dictionary, dictionary, seed_length, dynamic_se
     print(poem)
     return poem
 
-def generate_poems(num_of_poems, seed_length, output_filename, model_file, dyanic_seed=False):
+def generate_poems(num_of_poems, seed_length, output_filename, model_file, dynamic_seed=False, single=False):
     _, dictionary = embedding_loader.get_embedding(None, load=True)
     reverse_dictionary = {dictionary[key]: key for key in dictionary.keys()}
     model = load_model(model_file, custom_objects={"PositionalEncoding": PositionalEncoding, "Attention": Attention})
     generated_poems = ""
     for i in range(num_of_poems):
         print(f"{i+1}/{num_of_poems}")
-        poem = generate_poem(model, reverse_dictionary, dictionary, seed_length, dyanic_seed)
+        poem = generate_poem(model, reverse_dictionary, dictionary, seed_length, dynamic_seed, single)
         generated_poems += poem
     #with open(output_filename, "w", encoding="utf-8") as file:
     #    file.write(generated_poems)
