@@ -44,7 +44,7 @@ class TupleDataGenerator(Sequence):
         idx, batch_idx = self.indexes[item]
         data = self.data[idx][0][batch_idx]
         labels = self.data[idx][1][batch_idx]
-        labels = single_label_smoothing(labels, self.vocab_len, self.smoothing)
+        labels = single_label_smoothing(labels, self.vocab_len, self.smoothing) if self.single else label_smoothing(labels, self.vocab_len, self.smoothing)
         return data, labels
 
     def __len__(self):
