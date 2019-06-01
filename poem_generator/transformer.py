@@ -67,9 +67,9 @@ class Attention(Layer):
 
     def compute_output_shape(self, input_shape):
         if self.self_attention:
-            return input_shape[0], input_shape[1], self.dim
+            return input_shape[0], input_shape[1], EMBEDDING_DIMENSION
         else:
-            return input_shape[0][0], input_shape[0][1], self.dim
+            return input_shape[0][0], input_shape[0][1], EMBEDDING_DIMENSION
 
 
     def get_config(self):

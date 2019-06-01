@@ -62,6 +62,7 @@ def get_char_embedding(characters, save=False, load=False):
 def tuple_to_indices(ngram_tuples, dictionary, remove_oov_labels=False):
     index_ngram_tuples = []
     for ngram, label in ngram_tuples:
+        skip = False
         index_ngram = []
         index_label = []
         for word in ngram:
@@ -73,15 +74,12 @@ def tuple_to_indices(ngram_tuples, dictionary, remove_oov_labels=False):
             try:
                 index_label.append(dictionary[word])
             except KeyError:
-                index_label.append(dictionary[OUT_OF_VOCAB_TOKEN])
-        # try:
-        #     index_label = dictionary[label]
-        # except KeyError:
-        #     if remove_oov_labels:
-        #         continue
-        #     else:
-        #         index_label = dictionary[OUT_OF_VOCAB_TOKEN]
-        index_ngram_tuples.append((index_ngram, index_label))
+                if not remove_oov_labels:
+                    index_label.append(dictionary[OUT_OF_VOCAB_TOKEN])
+                else:
+                    skip = True
+        if not skip:
+            index_ngram_tuples.append((index_ngram, index_label))
     return index_ngram_tuples
 
 if __name__ == "__main__":
