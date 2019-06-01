@@ -42,8 +42,9 @@ def ngram_tuplelizer(poems, n, sos_pad=True, first_only=False, single=False):
         i = 0
         while i+n < len(poem):
             if single:
-                tuples.append((poem[i:i+n], poem[i+n]))
-            tuples.append((poem[i:i+n], poem[i+1:i+n+1]))
+                tuples.append((poem[i:i+n], [poem[i+n]]))
+            else:
+                tuples.append((poem[i:i+n], poem[i+1:i+n+1]))
             i += 1
             if first_only:
                 break
