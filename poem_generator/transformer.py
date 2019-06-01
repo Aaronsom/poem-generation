@@ -36,7 +36,7 @@ class Attention(Layer):
                                      trainable=True)
         super(Attention, self).build(input_shape)  # Be sure to call this somewhere!
 
-    def call(self, x):
+    def call(self, x, mask=None):
         if self.self_attention:
             query = tf.tensordot(x, self.query, axes=[[2], [0]])
             key = tf.tensordot(x, self.key, axes=[[2], [0]])
@@ -71,6 +71,8 @@ class Attention(Layer):
         else:
             return input_shape[0][0], input_shape[0][1], EMBEDDING_DIMENSION
 
+    def compute_mask(self, inputs, mask=None):
+        return mask
 
     def get_config(self):
         config = super(Attention, self).get_config()
@@ -91,9 +93,12 @@ class PositionalEncoding(Layer):
         self.embedding = K.constant(value=positional_encoding(self.n))
         super(PositionalEncoding, self).build(input_shape)  # Be sure to call this somewhere!
 
-    def call(self, x):
+    def call(self, x, mask=None):
         input_shape = K.shape(x)
         return x + self.embedding[:, 0:input_shape[1]]
+
+    def compute_mask(self, inputs, mask=None):
+        return mask
 
     def compute_output_shape(self, input_shape):
         return input_shape
@@ -143,14 +148,15 @@ def decoder_block(encoder_inputs, inputs, heads):
 
 def transformer(n, embedding, vocab_len, single_out, blocks=6, heads=8, train_embedding=False, input_sequence_length=None):
     inputs = Input(shape=(input_sequence_length, ))
-    embedding = Embedding(input_dim=vocab_len, output_dim=EMBEDDING_DIMENSION, weights=[embedding], trainable=train_embedding)(inputs)
+    embedding = Embedding(input_dim=vocab_len, output_dim=EMBEDDING_DIMENSION, weights=[embedding],
+                          trainable=train_embedding, mask_zero=True)(inputs)
     embedding = PositionalEncoding(n)(embedding)
     encoder = Dropout(0.1)(embedding)
     for i in range(blocks):
-        encoder = encoder_block(encoder, 8)
+        encoder = encoder_block(encoder, heads)
     decoder = Dropout(0.1)(embedding)
     for i in range(blocks):
-        decoder = decoder_block(encoder, decoder, 8)
+        decoder = decoder_block(encoder, decoder, heads)
     out = Dropout(0.1)(encoder)
     if single_out:
         out = Lambda(lambda x: x[:, -1])(out)
