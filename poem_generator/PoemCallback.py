@@ -12,7 +12,7 @@ class PoemCallback(Callback):
         self.seed_length = seed_length
         self.single = single
 
-    def on_epoch_end(self, epoch):
+    def on_epoch_end(self, epoch, logs=None):
         for i in range(self.poems):
             print(f"Poem {i+1}/{self.poems}")
             generate_poem(self.model, self.reverse_dictionary, self.dictionary, self.seed_length, single=self.single)
