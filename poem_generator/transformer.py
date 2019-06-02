@@ -71,8 +71,8 @@ class Attention(Layer):
         else:
             return input_shape[0][0], input_shape[0][1], EMBEDDING_DIMENSION
 
-    def compute_mask(self, inputs, mask=None):
-        return mask
+#    def compute_mask(self, inputs, mask=None):
+#        return mask
 
     def get_config(self):
         config = super(Attention, self).get_config()
@@ -97,8 +97,8 @@ class PositionalEncoding(Layer):
         input_shape = K.shape(x)
         return x + self.embedding[:, 0:input_shape[1]]
 
-    def compute_mask(self, inputs, mask=None):
-        return mask
+#    def compute_mask(self, inputs, mask=None):
+#        return mask
 
     def compute_output_shape(self, input_shape):
         return input_shape
