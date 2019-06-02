@@ -149,7 +149,7 @@ def decoder_block(encoder_inputs, inputs, heads):
 def transformer(n, embedding, vocab_len, single_out, blocks=6, heads=8, train_embedding=False, input_sequence_length=None):
     inputs = Input(shape=(input_sequence_length, ))
     embedding = Embedding(input_dim=vocab_len, output_dim=EMBEDDING_DIMENSION, weights=[embedding],
-                          trainable=train_embedding, mask_zero=True)(inputs)
+                          trainable=train_embedding)(inputs)
     embedding = PositionalEncoding(n)(embedding)
     encoder = Dropout(0.1)(embedding)
     for i in range(blocks):
