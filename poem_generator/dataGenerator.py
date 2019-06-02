@@ -29,7 +29,7 @@ class TupleDataGenerator(Sequence):
         self.single = single
         tuples = multi_ngram_tupelizer(poems, ns, sos_pad, first_tuple_only, single)
         self.data = [[np.array(item) for item in zip(*tuple_to_indices(tuple, dictionary, True))] for tuple in tuples]
-        length = sum([len(tuple) for tuple in tuples])
+        length = sum([len(d[0]) for d in self.data])
         print(f"Training on {self.vocab_len} words with {length} {ns}-tuples")
         self.indexes = [(i, batch) for i, data in enumerate(self.data)
                         for batch in np.split(
