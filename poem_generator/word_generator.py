@@ -7,7 +7,7 @@ from keras.backend import set_epsilon, set_floatx
 from poem_generator.transformer import Attention, PositionalEncoding
 import zipfile
 
-def generate_poem(model, reverse_dictionary, dictionary, seed_length, dynamic_seed=False, single=False):
+def generate_poem(model, reverse_dictionary, dictionary, seed_length, dynamic_seed=False, single=False, too_short_retry=True):
     poem = ""
     last_output = ""
     iterations = 0
@@ -18,24 +18,25 @@ def generate_poem(model, reverse_dictionary, dictionary, seed_length, dynamic_se
             last_output_dist = model.predict(np.array([seed])).squeeze()
         else:
             last_output_dist = model.predict(np.array([seed]))[:, -1].squeeze()
-        last_output_idx = np.random.choice(len(dictionary), 1, p=last_output_dist).item()
+        last_output_idx = np.argmax(last_output_dist).item()#np.random.choice(len(dictionary), 1, p=last_output_dist).item()
         last_output = reverse_dictionary[last_output_idx]
 
 
         iterations += 1
 
         if last_output == END_OF_SEQUENCE_TOKEN or iterations == 60:
-            if iterations < 15:
+            if iterations < 15 and too_short_retry:
                 print("Too short. Try again\n")
-                return generate_poem(model, reverse_dictionary, dictionary, seed_length, dynamic_seed)
+                return generate_poem(model, reverse_dictionary, dictionary, seed_length, dynamic_seed, single, too_short_retry)
             if already_eol:
                 poem += "\n"
             else:
                 poem += "\n\n"
-        elif last_output == OUT_OF_VOCAB_TOKEN or last_output == PADDING_TOKEN or last_output == START_OF_SEQUENCE_TOKEN:
+        elif last_output == OUT_OF_VOCAB_TOKEN or last_output == PADDING_TOKEN \
+                or last_output == START_OF_SEQUENCE_TOKEN:
             iterations -= 1
         elif last_output == END_OF_LINE_TOKEN:
-            if iterations>1 and not already_eol:
+            if iterations > 1 and not already_eol:
                 already_eol = True
                 poem += "\n"
 
