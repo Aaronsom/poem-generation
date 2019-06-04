@@ -18,7 +18,7 @@ def generate_poem(model, reverse_dictionary, dictionary, seed_length, dynamic_se
             last_output_dist = model.predict(np.array([seed])).squeeze()
         else:
             last_output_dist = model.predict(np.array([seed]))[:, -1].squeeze()
-        last_output_idx = np.argmax(last_output_dist).item()#np.random.choice(len(dictionary), 1, p=last_output_dist).item()
+        last_output_idx = np.random.choice(len(dictionary), 1, p=last_output_dist).item()
         last_output = reverse_dictionary[last_output_idx]
 
 
