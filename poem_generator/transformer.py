@@ -157,7 +157,7 @@ def transformer(n, embedding, vocab_len, single_out, blocks=6, heads=8, train_em
     decoder = Dropout(0.1)(embedding)
     for i in range(blocks):
         decoder = decoder_block(encoder, decoder, heads)
-    out = Dropout(0.1)(encoder)
+    out = Dropout(0.1)(decoder)
     if single_out:
         out = Lambda(lambda x: x[:, -1])(out)
         out = Dense(vocab_len, activation="softmax")(out)
