@@ -1,5 +1,5 @@
-from keras.callbacks import Callback
-import keras.backend as K
+from tensorflow.keras.callbacks import Callback
+import tensorflow.keras.backend as K
 import math
 
 
@@ -12,5 +12,4 @@ class NoamSchedule(Callback):
     def on_batch_begin(self, batch, logs=None):
         self.global_steps += 1
         new_lr = self.lr * min(math.pow(self.global_steps, -0.5), self.global_steps*math.pow(self.warmup_steps, -1.5))
-        print(" lr "+str(new_lr))
         K.set_value(self.model.optimizer.lr, new_lr)
